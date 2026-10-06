@@ -1,0 +1,896 @@
+/* ===========================================================================
+   Antaaya Villas CRM — responsive.css
+   Loaded after the main <style> block in index.php (and in login.php), so it
+   only adds to / overrides the desktop design. Same colours, fonts, cards,
+   badges and buttons on every device — only size and arrangement change.
+
+   DESKTOP  1920px and wider ............ original design; table cells wrap instead of
+                                           being cut, Save rows pinned in long forms
+   LAPTOP   1024–1919px, mouse/trackpad . the same desktop UI, scaled down to fit
+            (also any screen 1367–1919px)  below 1600px (CSS zoom), slimmer sidebar,
+                                           table cells wrap instead of being cut,
+                                           Manage Leads leaves out 4 columns
+                                           (shown in the Lead Summary),
+                                           dialogs sized to the screen height,
+                                           smallest text kept readable
+   TABLET   701–1023px (any device) ..... portrait: top app bar + slide-out menu
+            touch tablets up to 1366px .. landscape (1024+): compact sidebar
+                                           tables become card grids, dialogs
+                                           scroll as one page, touch-sized controls
+   PHONE    up to 700px ................. app layout: app bar, bottom navigation,
+                                           floating "add" button, card lists,
+                                           bottom sheets / full-screen dialogs
+                                           (every table column is still on its card)
+
+   App-shell markup (app bar, menu backdrop, bottom nav) is in index.php; the
+   behaviour (menu, bottom nav, card labels, back button) is in
+   assets/js/responsive.js.
+   =========================================================================== */
+
+/* App shell parts: hidden on laptop / desktop */
+.rs-appbar, .rs-bottomnav, .rs-scrim { display: none }
+
+
+/* ===========================================================================
+   ALL SCREENS — dialogs
+   =========================================================================== */
+/* Edit Client / Add New Lead: the ✎ basic-details form sits at the top of the scrolling part
+   (moved there by responsive.js) — same spacing as before */
+#clientMidScroll > #basicEdit { margin: 0 0 18px }
+#clientForm:has(#basicEdit:not(.hidden)) #leadSummary { margin-bottom: 6px }
+
+/* Long form dialogs (Walk-in, Enquiry, Broker, Edit Source…): the Save / Cancel row stays at the bottom
+   of the dialog while the form scrolls; it gets a soft top shadow only when the form is longer than
+   the dialog (.rs-scroll, set by responsive.js) */
+.modal-box form > div[style*="text-align:right"]:last-child,
+.modal-box > div[style*="text-align:right"]:last-child {
+  position: sticky; bottom: -22px; z-index: 3; background: #fff;
+  margin: 0 -22px -22px; padding: 0 22px 22px;
+}
+.modal-box.rs-scroll form > div[style*="text-align:right"]:last-child,
+.modal-box.rs-scroll > div[style*="text-align:right"]:last-child { padding-top: 12px; box-shadow: 0 -8px 18px rgba(16, 24, 20, .06) }
+
+/* Lead Summary: a very long name (one long word) wraps inside the header instead of running under the × */
+.ls-header > div:last-child { min-width: 0 }
+.ls-name { overflow-wrap: anywhere }
+
+/* Villa Inventory status filter: the selected one is highlighted */
+.btn[data-villafilter].active { background: var(--accent); border-color: var(--accent); color: #fff }
+
+/* Profile photo cropper: dragging the photo with a finger moves the photo, not the page */
+#cropCircle { touch-action: none }
+
+
+/* ===========================================================================
+   LAPTOP + DESKTOP — tables
+   =========================================================================== */
+/* Table cells wrap onto a second line instead of pushing columns out of view (the desktop tables
+   were also cut on 1920px screens); badges, pills and action buttons stay on one line. Tables that
+   already fit look exactly as before. */
+@media (min-width: 1024px) and (pointer: fine), (min-width: 1367px) {
+  table { min-width: 0 }
+  th, td { white-space: normal }
+  td .badge, td .pay-pill, td .actions, td .btn, td .pay-mini { white-space: nowrap }
+  td .ps-pill { white-space: normal; line-height: 1.35 } /* long status pills ("Transferred to Post Sales — booking pending") */
+  td .actions { flex-wrap: nowrap }
+  /* single-word cells (dates, amounts, mobile numbers, codes) never break at a hyphen;
+     emails break only after "@" or a dot (responsive.js) */
+  td.rc-nowrap { white-space: nowrap }
+  td.rc-email { overflow-wrap: break-word }
+  .dash-row table { min-width: 0 }
+  /* Manage Leads: headings (icon + text), the Stage / Category / Interest pills, Source and Sales Person
+     always on one line. Columns that can't fit that way are left out of the table — they show in the
+     Lead Summary that opens on a row click (see the next rules). */
+  #leadsTableWrap th, #leadsTableWrap td[data-label="Source"], #leadsTableWrap td[data-label="Sales Person"] { white-space: nowrap }
+}
+/* Every table: a heading's icon stays on the same line as its text (responsive.js joins them) */
+.rs-th-lead { white-space: nowrap }
+/* Desktop: every table heading on one line */
+@media (min-width: 1920px) {
+  th { white-space: nowrap }
+}
+/* Manage Leads: Purpose, Configuration, Budget and Added By only show on very wide screens (2240px+),
+   where all 14 columns fit on one line; below that they're in the Lead Summary */
+@media (min-width: 1024px) and (max-width: 2239.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 2239.98px) {
+  #leadsTableWrap :is(th, td):is([data-label="Purpose"], [data-label="Configuration"], [data-label="Budget"], [data-label="Added By"]) { display: none }
+}
+
+
+/* ===========================================================================
+   LAPTOP — same UI, smaller
+   =========================================================================== */
+@media (min-width: 1024px) and (max-width: 1919.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 1919.98px) {
+  :root { --rs-z: 1; --rs-side: 290px; --rs-min: calc(9.5px / var(--rs-z)) }
+
+  /* Uniform scale: everything keeps its desktop proportions */
+  .app, .modal { zoom: var(--rs-z) }
+
+  .sidebar { width: var(--rs-side); padding: 20px 12px }
+  .brand-logo { max-height: 40px }
+  .nav button { padding: 11px 13px }
+  .main { margin-left: var(--rs-side); width: calc(100% - var(--rs-side)); padding: 22px 24px }
+  .modal { inset: 0 0 0 var(--rs-side) }
+
+  /* zoom shrinks vh too — keep the leads list the same share of the screen */
+  #leadsTableWrap { max-height: calc(64vh / var(--rs-z)) }
+  /* Manage Leads: slimmer cell padding and action buttons so the one-line columns fit */
+  #leadsTableWrap th, #leadsTableWrap td { padding-left: 6px; padding-right: 6px }
+  #leadsTableWrap td .actions { gap: 5px }
+  #leadsTableWrap td .actions .btn { padding-left: 10px; padding-right: 10px }
+
+  /* Dialogs: never taller than the screen (percentages follow the real screen size) */
+  .modal-box, .ls-box { max-height: 100% }
+  #clientModal .modal-box { width: min(1180px, 100%); height: min(820px, 100%); max-height: 100% }
+
+  /* Smallest text: never under ~9.5px on screen after the scale-down. --rs-min = 9.5px ÷ scale;
+     each group keeps its desktop size where that is already bigger (no effect from 1600px up). */
+  .badge:not(.stage-badge), .lead-summary .ls-label, .liquid-label, .next-step-panel .ns-label, .amt-tag,
+  .legal-docs .ld-req, .legal-docs .ld-opt, .pay-sub-n, .pay-table th, .ls-list .lsum-item label,
+  .ls-desk-grid .lsum-item label, .ls-stagebar .lbl, .notif-count, table.rt td small, .legal-docs .ld-stg small,
+  [style*="font-size:10px"], [style*="font-size: 10px"] { font-size: max(10px, var(--rs-min)) !important }
+  .nav-badge, .pay-pill, .pay-bar .pb-seg, .pt-tile span, .ls-desk-head, .ls-hist-phase span,
+  .attempt-log-item .ali-meta, .notif-item .notif-time,
+  [style*="font-size:10.5px"], [style*="font-size: 10.5px"] { font-size: max(10.5px, var(--rs-min)) !important }
+  th, .userbar button, .dash-desk-switch .ds-count, .card .sub, .badge.stage-badge, .pay-mini .pm-txt,
+  .attempt-log .al-title, .wa-row .wa-hint, .amt-hint, .legal-docs .ld-count, .legal-docs .ld-hint,
+  .kyc-panel-title small, .kyc-pill, .pc-title, .pay-link, .ls-history-title, .ls-hist-phase,
+  .ls-desk-head em, .ls-desk-grid .lsum-item small, .ls-facts .lsum-item small, .pay-table small, .ps-summary .ps-item label, .ps-summary .ps-note,
+  [style*="font-size:11px"], [style*="font-size: 11px"] { font-size: max(11px, var(--rs-min)) !important }
+  .desk-sum .ps-pill, .legal-docs .ld-none, .pt-tile small, .pd-hint, .legal-docs .ld-stg, .pp-keys,
+  .pay-sec-note, [style*="font-size:11.5px"], [style*="font-size: 11.5px"] { font-size: max(11.5px, var(--rs-min)) !important }
+}
+
+/* Lead Summary on laptops and tablets: same as desktop (only the history list scrolls) — but when even
+   that doesn't fit the screen height, the body scrolls with the Call / Close / Edit buttons pinned at
+   the bottom, instead of the buttons being cut off */
+@media (min-width: 701px) and (max-width: 1919.98px) {
+  .ls-body { overflow-y: auto }
+  .ls-footer { position: sticky; bottom: -14px; z-index: 2; background: #fff; margin: 0 -24px -14px; padding: 12px 24px 14px }
+}
+/* Scale steps (≈ a 1500–1700px wide desktop squeezed into the laptop screen; 1600px+ is not scaled) */
+@media (min-width: 1024px) and (max-width: 1099.98px) { :root { --rs-z: .8 } }
+@media (min-width: 1100px) and (max-width: 1199.98px) { :root { --rs-z: .82 } }
+@media (min-width: 1200px) and (max-width: 1299.98px) { :root { --rs-z: .84 } }
+@media (min-width: 1300px) and (max-width: 1399.98px) { :root { --rs-z: .88 } }
+@media (min-width: 1400px) and (max-width: 1499.98px) { :root { --rs-z: .92 } }
+@media (min-width: 1500px) and (max-width: 1599.98px) { :root { --rs-z: .96 } }
+/* Dashboard's Site Visits + Follow-ups tables: one under the other, full width, until the screen is wide
+   enough for both (each needs ~640px — narrower, columns ended up hidden behind the Action column) */
+@media (min-width: 1024px) and (max-width: 1719.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 1719.98px) {
+  .dash-row { grid-template-columns: 1fr }
+}
+/* Manage Leads on narrower laptops: to keep every row on one line, Next Follow-up (under 1500px) and
+   Category (under 1200px) also move to the Lead Summary (Category shows under the lead's name there) */
+@media (min-width: 1024px) and (max-width: 1499.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 1499.98px) {
+  #leadsTableWrap :is(th, td)[data-label="Next Follow-up"] { display: none }
+}
+@media (min-width: 1024px) and (max-width: 1199.98px) and (pointer: fine) {
+  #leadsTableWrap :is(th, td)[data-label="Category"] { display: none }
+}
+/* Legal desk's Manage Leads on laptops: Transferred, then Booking Date and Mobile move to the Lead
+   Summary as the screen gets narrower (Accounts desk: Transferred, Pay By, Mobile) */
+@media (min-width: 1024px) and (max-width: 1919.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 1919.98px) {
+  #leadsTableWrap table[data-leads="legal"] :is(th, td)[data-label="Transferred"] { display: none }
+}
+@media (min-width: 1024px) and (max-width: 1299.98px) and (pointer: fine) {
+  #leadsTableWrap table[data-leads="legal"] :is(th, td)[data-label="Booking Date"],
+  #leadsTableWrap table[data-leads="accounts"] :is(th, td)[data-label="Transferred"] { display: none }
+}
+@media (min-width: 1024px) and (max-width: 1199.98px) and (pointer: fine) {
+  #leadsTableWrap table[data-leads="legal"] :is(th, td)[data-label="Mobile"],
+  #leadsTableWrap table[data-leads="accounts"] :is(th, td)[data-label="Pay By"] { display: none }
+}
+@media (min-width: 1024px) and (max-width: 1099.98px) and (pointer: fine) {
+  #leadsTableWrap table[data-leads="accounts"] :is(th, td)[data-label="Mobile"] { display: none }
+}
+/* The widest tables on narrower laptops (Possession under 1500px; Payments and Source Leads at 1024px):
+   headings without their icons, so they fit without an icon sitting alone above the text */
+@media (min-width: 1024px) and (max-width: 1499.98px) and (pointer: fine),
+       (min-width: 1367px) and (max-width: 1499.98px) {
+  #possession th i { display: none }
+}
+@media (min-width: 1024px) and (max-width: 1099.98px) and (pointer: fine) {
+  #payments th i, #sourceleads th i { display: none }
+}
+/* Small laptops: a little less padding in table cells so wide tables fit */
+@media (min-width: 1024px) and (max-width: 1199.98px) and (pointer: fine) {
+  th, td { padding-left: 6px; padding-right: 6px }
+  .pay-mini { min-width: 96px }
+  td .actions { gap: 5px }
+  td .actions .btn { padding-left: 10px; padding-right: 10px }
+}
+@media (min-width: 1024px) and (max-width: 1099.98px) and (pointer: fine) {
+  :root { --rs-side: 260px }
+  th, td, #leadsTableWrap th, #leadsTableWrap td { padding-left: 4px; padding-right: 4px }
+  th { letter-spacing: .2px }
+  th i { margin-right: 3px }
+}
+
+
+/* ===========================================================================
+   TABLET + PHONE — shared (touch / small screens)
+   =========================================================================== */
+@media (max-width: 1023.98px), (max-width: 1366px) and (pointer: coarse) {
+
+  /* ---------- Data tables → cards (every column kept: label + value) ---------- */
+  .table-wrap { overflow: visible; padding-bottom: 0 }
+  #leadsTableWrap { max-height: none; overflow: visible }
+  table.rt { display: block; min-width: 0; width: 100% }
+  table.rt thead { display: none }
+  table.rt tbody { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px }
+  table.rt tbody tr {
+    display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 8px 12px;
+    position: relative; min-width: 0; padding: 13px 14px; border-radius: 12px;
+    background: #fbfcfb; border: 1px solid var(--line);
+  }
+  table.rt tbody tr.rt-click { cursor: pointer }
+  table.rt td {
+    display: block; flex: 1 1 calc(50% - 6px); min-width: 0; padding: 0; border: 0;
+    position: static; box-shadow: none; background: transparent !important;
+    white-space: normal; overflow-wrap: anywhere; font-size: 12.5px; text-align: left !important;
+    max-width: none !important;
+  }
+  table.rt td::before {
+    content: attr(data-label); display: block; margin-bottom: 2px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .4px; text-transform: uppercase; color: var(--muted);
+  }
+  table.rt td.rc-title { order: -3; flex-basis: 100%; font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.3 }
+  table.rt td.rc-title b { font-weight: 700 }
+  table.rt td.rc-title > div { font-weight: 500; margin-top: 2px }
+  table.rt tr:has(> td.rc-id) > td.rc-title { padding-right: 76px }
+  table.rt td.rc-id {
+    position: absolute; top: 12px; right: 12px; flex: none; max-width: 70px !important;
+    font-size: 10.5px; font-weight: 700; color: #475467; background: #eef2f6;
+    padding: 3px 8px; border-radius: 999px; text-align: center !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  table.rt td.rc-badge { order: -2; flex: 0 1 auto }
+  /* badges get their own line, details start below them */
+  table.rt tbody tr:has(> td.rc-badge)::after { content: ''; order: -1; flex: 1 1 100%; height: 0 }
+  table.rt td.rc-wide { flex-basis: 100% }
+  table.rt td.rc-email { flex-basis: 100% } /* emails get their own full-width line */
+  table.rt td.rc-actions {
+    order: 9; flex-basis: 100%; padding-top: 10px; border-top: 1px dashed var(--line);
+    display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px;
+  }
+  /* The action buttons sit on the bottom edge of every card, so cards side by side have them on one line
+     (a shorter card keeps its details at the top — the spare space goes above the buttons, never under them).
+     The card keeps room for the button row: 8px gap + 51px row (10px + dashed line + 40px buttons) + 13px. */
+  table.rt tbody tr:has(> td.rc-actions) { padding-bottom: 72px }
+  table.rt td.rc-actions { position: absolute; left: 14px; right: 14px; bottom: 13px; flex-wrap: nowrap }
+  table.rt td.rc-title::before, table.rt td.rc-id::before, table.rt td.rc-badge::before, table.rt td.rc-actions::before { display: none }
+  table.rt td.rc-empty { display: none }
+  table.rt td .actions { justify-content: flex-end !important; flex-wrap: wrap; gap: 8px }
+  table.rt td select { width: 100% }
+  table.rt tr.rt-msg { display: block; grid-column: 1 / -1; padding: 0; background: transparent; border: 0; box-shadow: none }
+  table.rt tr.rt-msg td { padding: 28px 14px; text-align: center !important; border: 1px dashed var(--line); border-radius: 12px; background: #fff !important }
+  table.rt tr.rt-msg td::before { display: none }
+  table.rt tr:hover td { background: transparent !important }
+
+  /* ---------- Dialogs: whole dialog scrolls, header and buttons stay put ---------- */
+  .modal { z-index: 1300 }
+  .modal-box, .ls-box { max-height: 100%; overscroll-behavior: contain }
+  #clientModal .modal-box {
+    width: 100%; height: 100%; max-height: 100%; display: block; overflow-y: auto; padding: 0 18px;
+  }
+  #clientModal .modal-head {
+    position: sticky; top: 0; z-index: 7; background: #fff;
+    margin: 0 -18px 12px; padding: 14px 18px 12px; border-bottom: 1px solid var(--line);
+  }
+  #clientForm { display: block }
+  #clientModal .modal-mid-scroll { overflow: visible; margin: 0; padding: 0 }
+  #clientModal .client-modal-footer {
+    position: sticky; bottom: 0; z-index: 7; background: #fff;
+    margin: 12px -18px 0; padding: 12px 18px; box-shadow: 0 -8px 18px rgba(16, 24, 20, .06);
+  }
+  #clientTitle[data-sub]:not([data-sub=""])::after {
+    content: attr(data-sub); display: block; margin-top: 2px;
+    font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #clientModal .modal-head h2 { min-width: 0 }
+  /* Unit Selection's wide field must not create extra grid columns */
+  .grid > [style*="grid-column:span 3"] { grid-column: 1 / -1 !important }
+
+  /* ---------- Type scale: a step smaller than desktop, to suit tablet / phone screens ---------- */
+  .top h1 { font-size: 26px }
+  .top p { font-size: 12.5px }
+  .card .label { font-size: 11px }
+  .card .num { font-size: 21px }
+  .panel h3 { font-size: 15px }
+  .modal-head h2 { font-size: 18px }
+  .ls-name { font-size: 16.5px }
+  .lead-summary .ls-value { font-size: 13px }
+  .ls-list .lsum-item div { font-size: 13px }
+  .pc-amt b { font-size: 19px }
+  .pay-title b, .pt-tile b { font-size: 15.5px }
+  .notif-head > span { font-size: 15px }
+  .attempt-log > .wa-hint { font-size: 12px } /* calendar-invite status line */
+
+  /* ---------- Touch sizes ---------- */
+  .btn { min-height: 40px }
+  .btn.btn-sm { min-height: 36px; padding: 6px 12px }
+  td .actions .btn, .actions .btn { min-width: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 6px }
+  .close { width: 36px; height: 36px; flex: none; font-size: 18px }
+  .chip { padding: 8px 13px; min-height: 38px }
+  .phase-switch button { min-height: 40px }
+  .ls-edit-btn { width: 38px; height: 38px }
+  .ls-call { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 36px; font-size: 13px; vertical-align: middle }
+  .notif-item .notif-x { width: 36px; height: 36px; margin: -8px -8px 0 0; flex: none }
+  .notif-item .notif-actions button { min-height: 36px; padding: 6px 12px }
+  .userbar button { min-height: 36px }
+  .legal-docs .ld-stg { min-height: 40px; padding: 8px 13px }
+  .pay-link { display: inline-flex; align-items: center; min-height: 40px; padding: 0 6px; margin-left: 4px }
+  .pay-act a, .pay-act button { min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center }
+  .vpick .vp-chip { padding: 4px 4px 4px 12px; font-size: 13px }
+  .vpick .vp-chip button { width: 36px; height: 36px; font-size: 16px }
+  .fv-row label { min-height: 40px } /* Unit Selection: each villa row is a comfortable tap target */
+  .notif-head button { min-height: 40px; display: inline-flex; align-items: center; padding: 0 8px; margin: -8px -8px }
+  #userForm button[onclick*="togglePwd"] { width: 36px !important; height: 36px !important; right: 4px !important }
+  /* Form dialogs: the Save / Cancel row (pinned at the bottom — see ALL SCREENS) gets a little more room */
+  .modal-box form > div[style*="text-align:right"]:last-child,
+  .modal-box > div[style*="text-align:right"]:last-child { margin-top: 8px; padding-top: 12px }
+  /* Payment schedule / payments received: fit the screen — no desktop min-width, names may wrap,
+     and the last column isn't pinned (it was covering the % / Amount columns) */
+  .pay-table { min-width: 0 }
+  .pay-table th, .pay-table td { white-space: normal }
+  .pay-table .num { white-space: nowrap }
+  .pay-table th:last-child, .pay-table td:last-child { position: static; box-shadow: none; background: transparent }
+  .pay-table tr.pt-cur td:last-child { background: #f3faf6 }
+  .photo-viewer, .crop-overlay { z-index: 1400 }
+}
+
+/* Touch screens: form text a little larger than desktop (14px) with finger-sized fields, no sticky
+   hover lifts. (iPhone / iPad would zoom into a field under 16px — responsive.js stops that.) */
+@media (pointer: coarse) and (max-width: 1366px), (max-width: 700px) {
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select, textarea { font-size: 14px }
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select { min-height: 42px }
+  .stage-jump select { font-size: 14px; min-height: 38px }
+  input { text-overflow: ellipsis } /* a long hint ("Search name, mobile, Lead ID…") ends in … when cut */
+
+  /* Search bars + filters on every page (Manage Leads, Follow-ups, Site Visits, Bookings, Payments,
+     Possession, Source Leads, Notification Log, Villa Inventory): one compact size on phones and tablets —
+     36px tall with 13px text, the same as on desktop — instead of the bigger form-field size above.
+     Form fields inside dialogs keep the bigger size. */
+  .main :is(.toolbar, .toolbar-row) :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]), select) {
+    height: 36px; min-height: 36px; padding: 0 9px; font-size: 13px;
+  }
+  .main .toolbar .search-box input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]) { padding-right: 32px } /* room for the 🔍 */
+  .main .search-box i { right: 11px; font-size: 13px }
+  #notiflog .toolbar-row .btn, .btn[data-villafilter] { min-height: 36px; padding-top: 0; padding-bottom: 0; font-size: 13px }
+}
+@media (hover: none) {
+  .btn:hover, .btn.primary:hover, .card:hover, .card.dash-link:hover, .chip:not(.chip-locked):hover,
+  .modal-box.modal-float .card:hover { transform: none }
+  .btn, .chip, .nav button, .rs-bottomnav button, .tab { -webkit-tap-highlight-color: transparent }
+  .btn:active, .chip:not(.chip-locked):active { transform: scale(.97) }
+  table.rt tbody tr.rt-click:active { background: #f3f7f4 }
+}
+
+
+/* ===========================================================================
+   TABLET + PHONE below 1024px — app shell (top app bar + slide-out menu)
+   =========================================================================== */
+@media (max-width: 1023.98px) {
+  /* ---------- Top app bar (same dark look as the sidebar) ---------- */
+  .rs-appbar {
+    display: flex; align-items: center; gap: 10px;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1100;
+    height: calc(58px + env(safe-area-inset-top)); padding: env(safe-area-inset-top) 12px 0;
+    background: linear-gradient(160deg, var(--side-bg1) 0%, var(--side-bg2) 100%);
+    color: #fff; overflow: hidden; isolation: isolate;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .22);
+  }
+  .rs-appbar::before { content: ''; position: absolute; inset: -12px; background: url('../../image/last-page.jpg') center / cover; filter: blur(8px); z-index: -2 }
+  .rs-appbar::after { content: ''; position: absolute; inset: 0; background: rgba(0, 0, 0, .8); z-index: -1 }
+  .rs-icon-btn {
+    width: 40px; height: 40px; flex: none; display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255, 255, 255, .14); background: rgba(255, 255, 255, .06);
+    color: #fff; border-radius: 12px; font-size: 17px; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .rs-brand { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 }
+  .rs-brand img { height: 26px; width: auto; max-width: 42%; object-fit: contain }
+  .rs-brand .rs-brand-div { width: 1px; height: 22px; background: rgba(255, 255, 255, .25); flex: none }
+  .rs-appbar-end { display: flex; align-items: center; gap: 8px; flex: none }
+  /* Notification bell moved into the app bar (responsive.js) */
+  .rs-appbar .notif-btn {
+    width: 40px; height: 40px; min-height: 0; border-radius: 12px; font-size: 16px;
+    background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .14); color: #fff; box-shadow: none;
+  }
+  .rs-appbar .notif-btn:hover { transform: none; box-shadow: none }
+  .rs-appbar .notif-count { top: -5px; right: -5px; border: 2px solid #0b1712 }
+  .rs-appbar .notif-panel {
+    position: fixed; top: calc(64px + env(safe-area-inset-top)); right: 10px; left: auto;
+    width: min(400px, calc(100vw - 20px)); max-height: min(520px, calc(100vh - 150px)); color: var(--ink);
+    box-shadow: 0 18px 44px rgba(16, 24, 20, .28);
+  }
+
+  /* ---------- Profile photo at the right end (bell just before it) + its small account card ---------- */
+  .rs-me { position: relative; flex: none }
+  .rs-me-btn {
+    width: 40px; height: 40px; padding: 0; flex: none; border-radius: 50%; overflow: hidden; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18); color: #cbd5d0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rs-me-btn[aria-expanded="true"] { border-color: var(--brand-green2); box-shadow: 0 0 0 2px rgba(141, 198, 63, .35) }
+  .rs-me-btn img, .rs-me-pic img { width: 100%; height: 100%; object-fit: cover; display: block }
+  .rs-me-btn i { font-size: 24px }
+  .rs-me-panel {
+    position: fixed; top: calc(64px + env(safe-area-inset-top)); right: max(10px, env(safe-area-inset-right)); z-index: 5;
+    width: min(280px, calc(100vw - 20px)); overflow: hidden; color: var(--ink);
+    background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 44px rgba(16, 24, 20, .28);
+  }
+  .rs-me-panel[hidden] { display: none }
+  .rs-me-head { display: flex; align-items: center; gap: 12px; padding: 14px; border-bottom: 1px solid var(--line) }
+  .rs-me-pic {
+    width: 44px; height: 44px; flex: none; border-radius: 50%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; background: rgba(31, 92, 69, .08); color: var(--accent); font-size: 24px;
+  }
+  .rs-me-who { min-width: 0 }
+  .rs-me-who b { display: block; font-size: 14px; line-height: 1.3; overflow-wrap: anywhere }
+  .rs-me-who span { display: block; margin-top: 2px; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: capitalize }
+  .rs-me-act {
+    display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 0 14px; border: 0; background: #fff;
+    font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .rs-me-act + .rs-me-act { border-top: 1px solid #f1f3f2 }
+  .rs-me-act i { width: 18px; text-align: center; color: var(--muted) }
+  .rs-me-act:active { background: #f3f7f4 }
+  .rs-me-act.rs-me-logout, .rs-me-act.rs-me-logout i { color: var(--danger) }
+
+  /* ---------- Sidebar becomes a slide-out menu ---------- */
+  .sidebar {
+    width: min(86vw, 320px); z-index: 1250;
+    padding: calc(20px + env(safe-area-inset-top)) 14px calc(14px + env(safe-area-inset-bottom));
+    transform: translateX(-104%); visibility: hidden; box-shadow: none;
+    transition: transform .28s cubic-bezier(.4, 0, .2, 1), visibility 0s linear .28s;
+  }
+  body.rs-nav-open .sidebar {
+    transform: none; visibility: visible; box-shadow: 18px 0 48px rgba(0, 0, 0, .45);
+    transition: transform .28s cubic-bezier(.4, 0, .2, 1), visibility 0s;
+  }
+  /* undo the desktop icon-rail rules below 700px */
+  .brand-wrap { padding: 2px 10px 16px }
+  .brand-logos { gap: 12px }
+  .brand-logo { max-height: 40px }
+  .brand-divider { height: 32px }
+  .brand-sub { font-size: 12px }
+  .nav span:not(.nav-badge) { display: inline }
+  .nav button { padding: 13px 14px; font-size: 14px }
+  .rs-scrim {
+    display: block; position: fixed; inset: 0; z-index: 1200; background: rgba(0, 0, 0, .5);
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  body.rs-nav-open .rs-scrim { opacity: 1; pointer-events: auto }
+  body.rs-nav-open, body.rs-modal-open { overflow: hidden }
+
+  /* ---------- Content ---------- */
+  .main { margin-left: 0; width: 100%; padding: calc(58px + env(safe-area-inset-top) + 20px) 20px 32px }
+  .modal { inset: 0; padding: 12px }
+  /* Dashboard header: bell lives in the app bar now */
+  #dashboard .top > div[style] { flex: none }
+
+  /* ---------- iPhone held sideways: keep content clear of the notch / rounded corners ---------- */
+  .rs-appbar { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)) }
+  .main { padding-left: max(20px, env(safe-area-inset-left)); padding-right: max(20px, env(safe-area-inset-right)) }
+  .modal { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)) }
+  .sidebar { padding-left: max(14px, env(safe-area-inset-left)) }
+  .rs-appbar .notif-panel { right: max(10px, env(safe-area-inset-right)) }
+}
+
+/* Short screens (small phones, phones held sideways): a tighter menu so more of it fits */
+@media (max-width: 1023.98px) and (max-height: 700px) {
+  .brand-wrap { padding: 0 10px 10px }
+  .brand-logo { max-height: 32px }
+  .brand-divider { height: 26px }
+  .nav button { padding: 9px 14px }
+  .userbar { padding-top: 10px }
+}
+
+/* Phones / small tablets held sideways (under 500px tall): slimmer app bar and dialog bars,
+   so more of the content shows */
+@media (max-width: 1023.98px) and (max-height: 500px) {
+  .rs-appbar { height: calc(48px + env(safe-area-inset-top)) }
+  .rs-icon-btn, .rs-appbar .notif-btn, .rs-me-btn { width: 36px; height: 36px }
+  .rs-me-btn i { font-size: 22px }
+  .rs-brand img { height: 22px }
+  .main { padding-top: calc(48px + env(safe-area-inset-top) + 14px) }
+  .rs-appbar .notif-panel, .rs-me-panel { top: calc(54px + env(safe-area-inset-top)) }
+  .rs-appbar .notif-panel { max-height: calc(100vh - 66px) }
+  #clientModal .modal-head { padding-top: 8px; padding-bottom: 8px; margin-bottom: 8px }
+  #clientModal .modal-head h2 { font-size: 17px }
+  #clientTitle[data-sub]:not([data-sub=""])::after { display: inline; margin: 0 0 0 10px }
+  #clientModal .client-modal-footer { margin-top: 8px; padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)) }
+  #clientModal .client-modal-footer .btn { min-height: 38px; padding-top: 6px; padding-bottom: 6px }
+  .modal-box form > div[style*="text-align:right"]:last-child,
+  .modal-box > div[style*="text-align:right"]:last-child { margin-top: 4px; padding-top: 8px }
+  .modal-box [style*="text-align:right"] > .btn { min-height: 40px }
+  .ls-header { padding-top: 8px; padding-bottom: 8px }
+  .ls-footer { padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom)) }
+  .ls-footer .btn { min-height: 38px }
+}
+
+
+/* ===========================================================================
+   TABLET — portrait (701–1023px)
+   =========================================================================== */
+@media (min-width: 701px) and (max-width: 1023.98px) {
+  .cards { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px }
+  .cards > .card { grid-column: span 2 }
+  /* 5 KPI cards → 3 on top, 2 below; 4 → 2 + 2 */
+  .cards > .card:nth-child(4):nth-last-child(2), .cards > .card:nth-child(5):nth-last-child(1) { grid-column: span 3 }
+  .cards > .card:nth-child(1):nth-last-child(4), .cards > .card:nth-child(2):nth-last-child(3),
+  .cards > .card:nth-child(3):nth-last-child(2), .cards > .card:nth-child(4):nth-last-child(1) { grid-column: span 3 }
+  .dash-row { grid-template-columns: 1fr }
+  .grid, .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .pay-form .grid { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+  .toolbar-row select, .toolbar input, .toolbar select { min-width: 0 }
+  .toolbar-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) }
+  /* Leads by Category popup: 2 × 2 cards (its own 5-column layout was fighting the KPI card spans) */
+  #totalLeadsBreakdown .cards { grid-template-columns: repeat(2, minmax(0, 1fr)) !important }
+  #totalLeadsBreakdown .cards > .card { grid-column: auto !important }
+}
+@media (min-width: 701px) and (max-width: 899.98px) {
+  .grid, .grid-3, .pay-form .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+}
+
+
+/* ===========================================================================
+   TABLET — landscape (touch, 1024–1366px): compact sidebar
+   =========================================================================== */
+@media (min-width: 1024px) and (max-width: 1366px) and (pointer: coarse) {
+  .sidebar { width: 240px; padding: 18px 10px }
+  .brand-wrap { padding: 2px 6px 14px }
+  .brand-logos { gap: 10px }
+  .brand-logo { max-height: 34px }
+  .brand-divider { height: 28px }
+  .brand-sub { font-size: 11px; letter-spacing: 1px }
+  .nav button { padding: 12px; font-size: 13px; gap: 10px }
+  .userbar { gap: 8px; padding: 12px 6px 4px }
+  .userbar button { padding: 7px 10px }
+  .main { margin-left: 240px; width: calc(100% - 240px); padding: 20px 20px 28px }
+  .modal { inset: 0 0 0 240px; padding: 12px }
+  .card { padding: 14px }
+  .card-icon { width: 38px; height: 38px; font-size: 16px }
+  .dash-row table.rt tbody { grid-template-columns: 1fr }
+  .toolbar-row select, .toolbar input, .toolbar select { min-width: 0 }
+}
+/* Touch tablets 1024–1199px wide: dialog forms three fields to a row instead of four, so longer
+   choices ("Resident Individual"…) aren't cut off */
+@media (min-width: 1024px) and (max-width: 1199.98px) and (pointer: coarse) {
+  .modal .grid:not(.grid-2):not(.grid-3) { grid-template-columns: repeat(3, minmax(0, 1fr)) }
+}
+
+
+/* ===========================================================================
+   PHONE — app layout (up to 700px)
+   =========================================================================== */
+@media (max-width: 700px) {
+  body { -webkit-text-size-adjust: 100%; text-size-adjust: 100% }
+
+  /* ---------- Bottom navigation ---------- */
+  .rs-bottomnav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1100;
+    height: calc(64px + env(safe-area-inset-bottom)); padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+    background: rgba(6, 12, 9, .97); border-top: 1px solid rgba(255, 255, 255, .06);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .18);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  }
+  .rs-bottomnav button {
+    flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    border: 0; background: transparent; color: rgba(255, 255, 255, .62); cursor: pointer; padding: 6px 2px;
+    font: inherit; font-size: 10.5px; font-weight: 600; letter-spacing: .1px;
+  }
+  .rs-bottomnav .rs-bn-ico {
+    position: relative; width: 54px; height: 30px; border-radius: 15px;
+    display: flex; align-items: center; justify-content: center; font-size: 17px; transition: background .2s;
+  }
+  .rs-bottomnav .rs-bn-lbl { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .rs-bottomnav button.active { color: #fff }
+  .rs-bottomnav button.active .rs-bn-ico { background: linear-gradient(90deg, rgba(118, 202, 9, .26), rgba(118, 202, 9, .12)); color: var(--brand-green2) }
+  .rs-bottomnav .rs-bn-badge {
+    position: absolute; top: -2px; right: 6px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+    background: var(--brand-green2); color: #0d1a08; font-size: 10px; font-weight: 800; font-style: normal;
+    display: flex; align-items: center; justify-content: center; border: 2px solid #060c09;
+  }
+  .rs-bottomnav .rs-bn-badge[hidden] { display: none }
+
+  /* ---------- Page layout ---------- */
+  .main { padding: calc(58px + env(safe-area-inset-top) + 16px) max(14px, env(safe-area-inset-right)) calc(64px + env(safe-area-inset-bottom) + 80px) max(14px, env(safe-area-inset-left)) }
+  .top { flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: flex-start }
+  .top h1 { font-size: 23px; line-height: 1.15 }
+  .top p { font-size: 12px; line-height: 1.45 }
+  .greeting-line { font-size: 12px }
+  /* The page's main "add" button becomes a floating action button above the bottom nav (48px — still a
+     full finger-sized tap target, without covering much of the list) */
+  .page .top .btn.primary {
+    position: fixed; right: max(16px, calc(env(safe-area-inset-right) + 8px)); bottom: calc(64px + env(safe-area-inset-bottom) + 14px); z-index: 1050;
+    width: 48px; height: 48px; min-height: 0; padding: 0; border-radius: 15px; font-size: 0;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(118, 202, 9, .42), 0 2px 5px rgba(0, 0, 0, .12);
+  }
+  .page .top .btn.primary i { font-size: 18px; margin: 0 }
+  body.rs-modal-open .page .top .btn.primary { visibility: hidden }
+
+  /* ---------- KPI cards: 2 per row (icon + number, then label), odd count → first one full width ---------- */
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px }
+  .card { padding: 13px; border-radius: 14px; min-width: 0 }
+  .cards > .card {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "ic lb" "nm nm" "sb sb";
+    column-gap: 10px; align-items: center; align-content: start;
+  }
+  .cards > .card .card-icon { grid-area: ic; margin: 0 }
+  .cards > .card .label { grid-area: lb; margin: 0 }
+  .cards > .card .num { grid-area: nm; margin: 10px 0 0; white-space: nowrap }
+  .cards > .card .sub { grid-area: sb }
+  .card-icon { width: 34px; height: 34px; font-size: 15px; margin-bottom: 8px }
+  .card .label { font-size: 10.5px; line-height: 1.3; letter-spacing: .2px; overflow-wrap: anywhere }
+  .card .num { font-size: 19px; margin-top: 4px; overflow-wrap: anywhere; line-height: 1.15 }
+  .card .sub { font-size: 10.5px; line-height: 1.35 }
+  .cards > .card:first-child:nth-last-child(odd) {
+    grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "ic lb nm" "ic sb nm"; column-gap: 12px; align-items: center;
+  }
+  .cards > .card:first-child:nth-last-child(odd) .card-icon { grid-area: ic; margin: 0; width: 42px; height: 42px; font-size: 17px }
+  .cards > .card:first-child:nth-last-child(odd) .label { grid-area: lb; align-self: end; margin: 0 }
+  .cards > .card:first-child:nth-last-child(odd) .sub { grid-area: sb; margin: 0; align-self: start }
+  .cards > .card:first-child:nth-last-child(odd) .num { grid-area: nm; margin: 0; font-size: 24px }
+  #totalLeadsBreakdown .cards { grid-template-columns: repeat(2, minmax(0, 1fr)) !important }
+
+  /* ---------- Panels open up: section title + white cards on the page background ---------- */
+  .panel { background: transparent; border: 0; box-shadow: none; border-radius: 0; padding: 0; margin-bottom: 22px }
+  .panel h3 { font-size: 14.5px; margin: 0 0 10px }
+  .dash-row { grid-template-columns: 1fr; gap: 0 }
+  .dash-row .panel { margin-bottom: 22px }
+  .panel .empty { padding: 24px 14px; background: #fff; border: 1px dashed var(--line); border-radius: 12px; font-size: 13px }
+  table.rt tbody { grid-template-columns: 1fr; gap: 10px }
+  table.rt tbody tr { background: #fff; border-color: rgba(31, 35, 40, .07); box-shadow: 0 1px 2px rgba(16, 24, 20, .04), 0 6px 16px rgba(16, 24, 20, .05) }
+  table.rt td { font-size: 12.5px }
+
+  /* ---------- Filters ---------- */
+  .toolbar { gap: 8px; margin-bottom: 14px }
+  .toolbar-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px }
+  .toolbar-row > :last-child:nth-child(odd) { grid-column: 1 / -1 }
+  /* a filter whose chosen text wouldn't fit at half width puts that filter row one per line (responsive.js) */
+  .toolbar-row.rs-one-col { grid-template-columns: minmax(0, 1fr) }
+  .toolbar-row.rs-one-col > :last-child:nth-child(odd) { grid-column: auto }
+  .toolbar input, .toolbar select, .toolbar-row select, .toolbar-row input { min-width: 0 !important }
+  #notiflog .toolbar-row[style] { display: grid !important; gap: 8px !important }
+  #notiflog .toolbar-row .field { margin: 0 }
+  #notiflog .toolbar-row .field[style] .btn { width: 100% }
+  /* Villa Inventory status filter → swipeable chips */
+  #villas .panel[style*="display:flex"] {
+    flex-wrap: nowrap !important; overflow-x: auto; gap: 8px !important; margin: 0 -14px 14px !important; padding: 2px 14px 6px !important;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  #villas .panel[style*="display:flex"]::-webkit-scrollbar { display: none }
+  #villas .panel[style*="display:flex"] .btn { flex: none; border-radius: 999px; padding: 8px 15px; font-size: 13px }
+  .desk-sum { margin: -2px 0 12px }
+
+  /* Admin dashboard Sales | Legal | Accounts and other segmented switches: full width */
+  .phase-switch { display: flex; width: 100% }
+  .phase-switch button { flex: 1 1 0; justify-content: center; padding: 9px 6px; font-size: 12.5px; min-width: 0 }
+  .dash-desk-switch .ds-count { flex: none } /* a count is never squeezed out of its pill */
+  .pay-subtabs { width: 100% }
+
+  /* Duplicate-lead alert bar */
+  #duplicateAlerts > div { flex-wrap: wrap }
+  #duplicateAlerts > div > span { flex: 1 1 100% !important }
+  #duplicateAlerts > div > .btn { flex: 1 1 0 }
+
+  /* ---------- Forms ---------- */
+  .grid, .grid-2, .grid-3, .pay-form .grid { grid-template-columns: 1fr; gap: 0 12px }
+  .field { margin-bottom: 12px }
+  .field label { font-size: 12px }
+
+  /* ---------- Dialogs: bottom sheets ---------- */
+  .modal { padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left); align-items: flex-end }
+  .modal-box, .ls-box {
+    width: 100% !important; max-width: none !important; max-height: calc(100% - 26px - env(safe-area-inset-top));
+    border-radius: 20px 20px 0 0; padding: 22px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .modal.show .modal-box { animation: rs-sheet-up .26s cubic-bezier(.2, .8, .2, 1) }
+  .modal-box::before { content: ''; display: block; width: 40px; height: 4px; border-radius: 4px; background: #d0d5dd; margin: -10px auto 14px }
+  .modal-head h2 { font-size: 16.5px }
+  .modal-box [style*="text-align:right"] { display: flex; gap: 10px; margin-top: 6px }
+  .modal-box [style*="text-align:right"] > .btn { flex: 1 1 0; min-height: 46px }
+  /* long forms: the Save / Cancel row stays at the bottom of the sheet while scrolling */
+  .modal-box form > div[style*="text-align:right"]:last-child,
+  .modal-box > div[style*="text-align:right"]:last-child {
+    bottom: calc(-18px - env(safe-area-inset-bottom));
+    margin: 6px -16px calc(-18px - env(safe-area-inset-bottom)); padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
+  }
+  /* payment tables: tighter cells, pills may wrap */
+  .pay-table th, .pay-table td { padding: 6px 5px }
+  .pay-table small { overflow-wrap: anywhere } /* long cheque / UTR numbers may break */
+  .pay-table .pay-pill { white-space: normal }
+  #quickPickerModal .modal-box .btn { min-height: 52px }
+  /* Leads by Category floats over the page */
+  #totalLeadsModal { align-items: center; padding: 16px }
+  #totalLeadsModal .modal-box { border-radius: 0; padding: 0; overflow-y: auto }
+  #totalLeadsModal .modal-box::before { display: none }
+
+  /* Edit Client: full screen */
+  #clientModal .modal-box { height: 100%; max-height: 100%; border-radius: 0; padding: 0 14px; animation: none }
+  #clientModal .modal-box::before { display: none }
+  #clientModal .modal-head { margin: 0 -14px 12px; padding: calc(10px + env(safe-area-inset-top)) 14px 10px }
+  #clientModal .client-modal-footer { margin: 12px -14px 0; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); gap: 8px }
+  #clientModal .client-modal-footer > div:last-child { display: flex; gap: 8px; flex: 1; justify-content: flex-end }
+  #clientModal .client-modal-footer .btn { min-height: 44px; padding: 10px 14px }
+  #clientModal .client-modal-footer .btn.primary { flex: 1 1 auto; max-width: 180px }
+
+  /* lead summary strip */
+  .lead-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row dense; gap: 10px 14px; padding: 12px 46px 12px 12px }
+  .lead-summary .ls-item { min-width: 0 }
+  .lead-summary .ls-item:nth-child(4), .lead-summary .ls-item:nth-child(11) { grid-column: 1 / -1 } /* Email, Broker Email */
+  .lead-summary .ls-value { font-size: 12.5px; overflow-wrap: anywhere }
+  .lead-basic-edit { padding: 12px 12px 4px }
+  /* stage progress: dots + fill only, the current stage is written underneath */
+  .liquid-step { min-width: 0 }
+  .liquid-label { display: none }
+  .liquid-line-wrap { margin: 0 -2px }
+  .liquid-cur-label { font-size: 12.5px; gap: 8px }
+  .stage-jump { margin-left: 0; padding-left: 0; width: 100% }
+  .stage-jump select { flex: 1; max-width: none }
+  /* stage tabs + checkpoint chips: one swipeable row */
+  #clientModal .tabs { margin: 0 -14px 14px; padding: 0 14px; scrollbar-width: none; position: relative }
+  #clientModal .tabs::-webkit-scrollbar, .stage-checklist::-webkit-scrollbar { display: none }
+  #clientModal .tab { padding: 11px 12px; font-size: 13px }
+  .stage-checklist { flex-wrap: nowrap; overflow-x: auto; margin: 0 -14px 14px; padding: 2px 14px 6px; scrollbar-width: none; position: relative; -webkit-overflow-scrolling: touch }
+  .stage-checklist .chip { flex: none }
+  .stage-section { padding: 12px; border-radius: 12px }
+  .stage-section .ss-head { flex-wrap: wrap; font-size: 13.5px }
+  .wa-row { gap: 8px }
+  .wa-row select { flex: 1 1 100%; width: 100% }
+  .wa-row .btn { flex: 1 1 auto; justify-content: center }
+  .attempt-log .al-add { flex-direction: column; align-items: stretch }
+  .legal-docs .ld-top { flex-wrap: wrap }
+  .legal-docs .ld-row { flex-direction: column; align-items: stretch; gap: 8px }
+  .legal-docs .ld-name { min-width: 0 }
+  .legal-docs .ld-file { max-width: 100% }
+  .legal-docs .ld-row .btn { align-self: flex-start }
+  .handover-box { flex-direction: column; align-items: stretch }
+  .handover-box .btn { width: 100% }
+  .fv-row { flex-wrap: wrap }
+  .fv-row .fv-price { flex: 1 1 100%; max-width: none }
+  .fv-row .fv-price[disabled] { display: none }
+  .kyc-panel .grid { grid-template-columns: 1fr }
+  .kyc-panel-head { flex-wrap: wrap }
+  .kyc-panel-title { flex: 1 1 calc(100% - 46px) }
+  .kyc-pill { margin-left: 42px }
+  .next-step-panel { padding: 10px 12px; gap: 10px }
+  .next-step-panel .ns-text { font-size: 12.5px }
+  .pay-card { padding: 12px }
+  .pay-status-grid { grid-template-columns: 1fr }
+  .pay-title b { font-size: 15px }
+  .pc-amt b { font-size: 17px }
+  .pt-tile b { font-size: 15px }
+  .ps-summary .ps-grid { grid-template-columns: 1fr 1fr }
+
+  /* Lead Summary: tall sheet, everything scrolls, buttons stay at the bottom */
+  .ls-box { display: block; overflow-y: auto; padding: 0 }
+  .ls-box::before { margin: 10px auto 0 }
+  #leadSummaryBody { display: block }
+  .ls-close { position: sticky; top: 10px; display: block; margin: -4px 12px -36px auto; z-index: 4 }
+  .ls-header { position: sticky; top: 0; z-index: 3; background: #fff; padding: 12px 56px 12px 16px }
+  .ls-name { font-size: 16px }
+  .ls-body { display: block; overflow: visible; padding: 12px 16px 0 }
+  .ls-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row dense; gap: 10px 14px; padding: 12px }
+  .ls-list .lsum-item { min-width: 0 }
+  .ls-list .lsum-item.lsum-wide { grid-column: span 2 } /* Email, Broker Email: a full row on 2-column phones */
+  .ls-list .lsum-item div { font-size: 12.5px; overflow-wrap: anywhere }
+  .ls-stagebar { gap: 10px; padding: 10px 12px }
+  .ls-desk-head { flex-wrap: wrap }
+  .ls-desk-head em { text-align: left }
+  .ls-body > .ls-history-list { max-height: none; overflow: visible; min-height: 0 }
+  .ls-footer {
+    position: sticky; bottom: 0; z-index: 3; background: #fff; gap: 8px;
+    margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 18px rgba(16, 24, 20, .06);
+  }
+  .ls-footer .btn { flex: 1 1 0; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px }
+
+  /* Profile photo viewer / cropper fit small screens */
+  .viewer-inner { width: min(320px, 80vw); height: min(320px, 80vw) }
+  .crop-box { padding: 18px }
+  .crop-square { width: min(280px, calc(100vw - 80px)); height: min(280px, calc(100vw - 80px)) }
+  .crop-mask { width: calc(100% - 20px); height: calc(100% - 20px) }
+  .crm-toast { bottom: calc(76px + env(safe-area-inset-bottom)) }
+}
+/* Narrow phones: the admin dashboard's Sales | Legal | Accounts switch leaves out its icons, so "Accounts" and
+   its count fit on one line (they ran past the edge); under 340px each name sits above its count */
+@media (max-width: 400px) {
+  .dash-desk-switch button { gap: 5px; padding-left: 4px; padding-right: 4px }
+  .dash-desk-switch button i { display: none }
+}
+@media (max-width: 340px) {
+  .dash-desk-switch button { flex-direction: column; gap: 3px; padding-top: 6px; padding-bottom: 6px }
+}
+@media (max-width: 480px) {
+  .pay-subtabs button i { display: none } /* the two inner tab names need the room */
+  .pay-table { font-size: 11.5px }
+  .pay-table th, .pay-table td { padding: 6px 4px }
+}
+/* Narrow phones: Payment Schedule / Payments Received fit without scrolling sideways —
+   tighter cells, notes (dates, cheque / UTR numbers) on their own line, Receipt + Delete stacked */
+@media (max-width: 400px) {
+  .pay-table { font-size: 11px }
+  .pay-table th, .pay-table td { padding: 5px 3px }
+  .pay-table .pay-pill { font-size: 10px; padding: 2px 6px }
+  .pay-table td small { display: block }
+  .pay-act { flex-direction: column; align-items: flex-end }
+}
+@media (max-width: 360px) {
+  .pay-table th, .pay-table td { padding: 5px 2px }
+  .pay-table .pay-pill { padding: 2px 5px }
+}
+/* Narrow phones: Leads by Category cards one per row (icon · name · count), like the first card —
+   at half width "UNCATEGORIZED" didn't fit beside the icon and broke in the middle of the word */
+@media (max-width: 380px) {
+  #totalLeadsBreakdown .cards { grid-template-columns: minmax(0, 1fr) !important; gap: 8px }
+  #totalLeadsBreakdown .cards > .card {
+    grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ic lb nm" "ic sb nm";
+    column-gap: 12px; align-items: center; padding: 11px 13px;
+  }
+  #totalLeadsBreakdown .cards > .card .card-icon { width: 38px; height: 38px; font-size: 16px; margin: 0 }
+  #totalLeadsBreakdown .cards > .card .label { align-self: end }
+  #totalLeadsBreakdown .cards > .card .sub { align-self: start; margin: 0 }
+  #totalLeadsBreakdown .cards > .card .num { margin: 0; font-size: 22px }
+}
+/* Phones held sideways (under 500px tall): slimmer bottom navigation */
+@media (max-width: 700px) and (max-height: 500px) {
+  .rs-bottomnav { height: calc(52px + env(safe-area-inset-bottom)) }
+  .rs-bottomnav button { gap: 2px; padding: 4px 2px }
+  .rs-bottomnav .rs-bn-ico { height: 26px }
+  .main { padding-bottom: calc(52px + env(safe-area-inset-bottom) + 70px) }
+  .page .top .btn.primary { bottom: calc(52px + env(safe-area-inset-bottom) + 12px); width: 44px; height: 44px; border-radius: 14px }
+  .page .top .btn.primary i { font-size: 17px }
+  .crm-toast { bottom: calc(62px + env(safe-area-inset-bottom)) }
+}
+/* Wider phones / small tablets in portrait: 2-column forms */
+@media (min-width: 481px) and (max-width: 700px) {
+  .grid, .grid-2, .grid-3, .pay-form .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .pay-status-grid { grid-template-columns: 1fr 1fr }
+}
+/* Very small phones */
+@media (max-width: 360px) {
+  select { font-size: 13px !important } /* long choices ("First Slab Completed (15%) — next") still fit */
+  .main { padding-left: 12px; padding-right: 12px }
+  #villas .panel[style*="display:flex"] { margin: 0 -12px 14px !important; padding: 2px 12px 6px !important }
+  .top h1 { font-size: 21px }
+  .card .num { font-size: 18px }
+  .rs-bottomnav .rs-bn-ico { width: 46px }
+  .lead-summary, .ls-list { grid-template-columns: 1fr 1fr }
+  /* Edit Client footer: the × in the header already cancels — keeps Mark Cancelled + Save on one line */
+  #clientModal .client-modal-footer > div:last-child > .btn:not(.primary) { display: none }
+  .ls-footer .btn:not(.primary):not(.call-btn) { display: none } /* Lead Summary: × closes it */
+}
+@media (max-width: 340px) {
+  .rs-bottomnav button { font-size: 9.5px; letter-spacing: 0 }
+}
+
+@keyframes rs-sheet-up {
+  from { transform: translateY(28px); opacity: .5 }
+  to { transform: none; opacity: 1 }
+}
+
+
+/* ===========================================================================
+   LOGIN PAGE (login.php has class="login-page" on <body>)
+   =========================================================================== */
+@media (max-width: 700px) {
+  body.login-page { padding: 20px 16px; overflow-y: auto }
+  body.login-page .box { padding: 32px 22px; border-radius: 16px }
+  body.login-page .brand-mark { height: 38px }
+  body.login-page input { font-size: 16px; padding: 10px 13px }
+  body.login-page button[type=submit] { padding: 14px; font-size: 15px }
+}
+@media (max-width: 360px) {
+  body.login-page .box { padding: 28px 16px }
+  body.login-page .brand-mark { height: 32px }
+}

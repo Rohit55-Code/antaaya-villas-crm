@@ -1,0 +1,26 @@
+# ── Real credentials — never commit ─────────────────────────
+config/db.php
+config/mail.php
+
+# ── Customer data uploaded through the CRM — never commit ───
+# (KYC, agreements, receipts, demand-letter PDFs)
+uploads/client_docs/*
+!uploads/client_docs/.gitkeep
+uploads/demand_letters/*
+!uploads/demand_letters/.gitkeep
+
+# ── User profile photos ─────────────────────────────────────
+image/avatars/*
+!image/avatars/.gitkeep
+
+# ── Database exports / backups ──────────────────────────────
+*.sql.gz
+*backup*.sql
+*dump*.sql
+
+# ── Editor / OS files ───────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

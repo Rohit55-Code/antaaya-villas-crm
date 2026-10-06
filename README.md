@@ -104,9 +104,9 @@ It started as a single-file HTML prototype using `localStorage` and grew — thr
 <div align="center">
 
 ### Mobile — app-like layout
-<img src="assets/screenshots/mobile-dashboard.png" alt="Mobile dashboard" width="260"/>&nbsp;&nbsp;
-<img src="assets/screenshots/mobile-leads.png" alt="Mobile leads" width="260"/>&nbsp;&nbsp;
-<img src="assets/screenshots/mobile-edit-client.png" alt="Mobile edit client" width="260"/>
+<img src="assets/screenshots/mobile-dashboard.jpeg" alt="Mobile dashboard" width="260"/>&nbsp;&nbsp;
+<img src="assets/screenshots/mobile-leads.jpeg" alt="Mobile leads" width="260"/>&nbsp;&nbsp;
+<img src="assets/screenshots/mobile-edit-client.jpeg" alt="Mobile edit client" width="260"/>
 
 </div>
 
